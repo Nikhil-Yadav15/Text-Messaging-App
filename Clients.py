@@ -87,13 +87,6 @@ class Network:
                         self.sendId = True
                         self.begin_sending = False
                         msg = ""
-                    elif self.user_text[:1] == "g":
-                        msg = str(f"~{len(self.user_text) - 1:<{SIZE}}" + "g" + self.user_text[1:])
-                        self.client.send(msg.encode("utf-8"))
-                        print("sending id")
-                        self.sendId = True
-                        self.begin_sending = False
-                        msg = ""
 
 
     def strThread(self):
