@@ -72,8 +72,12 @@ class Network:
     def recv(self):
         while True:
             if self.knowSender:
+                print("Know is true....")
                 if self.onceRecv:
+                    print("Once recv is true.....")
+                    print("Conn....", self.conn)
                     self.onceData = self.conn.recv(SIZE+2)
+                    print("onceData: ", self.onceData)
                     self.onceRecv = False
                     print("Value of OnceREcv: ", self.onceRecv)
                 print("OnceData: ", self.onceData)
@@ -93,6 +97,7 @@ class Network:
 
 
             if self.beginRecv:
+                print("begin recv is true.....")
                 self.data = self.senderConn.recv(SIZE + 7)
                 print("Name: ", self.name_dict[int(self.conn_dict[self.senderConn])])
                 if self.newMsg:
@@ -122,10 +127,34 @@ class Network:
                         self.msgtype = ""
                         self.toSend = ""
                         self.beginRecv = False
-                        self.onceRecv = True
                         self.knowSender = True
-
+                        self.onceRecv = True
+                        print("near end....")
                         self.newMsg = True
+
+                if self.msgtype == "g":
+                    self.incomingMsg += self.data.decode("utf-8")
+                    print("incoming...: ", self.incomingMsg)
+                    print("len...group...: ", self.msglen)
+                    ############################################################
+                    if len(self.incomingMsg[int(self.incomingMsg.index("g")) + 1:])  == self.msglen:
+                        print(f"Sender...grp: {self.name_dict[self.conn_dict[self.senderConn]]} ........ {self.incomingMsg[SIZE+2:]}")
+                        #################################
+                        #################################
+
+                        self.sendingGrp(self.incomingMsg[SIZE+2:], self.senderConnNo)
+                        print("above connNo: ", self.senderConnNo)
+                        self.senderConn = ""
+                        self.incomingMsg = ""
+                        self.data = ""
+                        self.msgtype = ""
+                        self.toSend = ""
+                        self.beginRecv = False
+                        self.knowSender = True
+                        self.onceRecv = True
+                        print("Near end grp.....")
+                        self.newMsg = True
+                    ############################################################
 
     def sending(self, sendingTo, dataToSend, Sender):
         print("Sender: ", Sender)
@@ -133,6 +162,14 @@ class Network:
         print("Sending this: ", str(f"{len(dataToSend):<{SIZE}}r{str(Sender)}{dataToSend}"))
         sendingTo.send(str(f"{len(dataToSend):<{SIZE}}r{str(Sender)}{dataToSend}").encode("utf-8"))
 
+    def sendingGrp(self, sendingData, sender):
+        print("Sendergrp....: ", sender)
+        print("Datatosendgrp....: ", sendingData)
+        for i in self.conn_dict.keys():
+            if self.conn_dict[i] != int(sender):
+                i.send(str(f"{len(sendingData):<{SIZE}}r{str(sender)}{sendingData}").encode("utf-8"))
+            else:
+                print("In else")
 
 
 
