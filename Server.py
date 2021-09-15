@@ -7,6 +7,7 @@ SIZE = 10
 # n: new client msg send
 # s: single interaction
 # g: grp interaction
+# i: identity
 
 class Network:
     def __init__(self):
@@ -14,7 +15,13 @@ class Network:
         self.conn_dict = {}
         self.addr_list = []
         self.name_dict = {}
-        self.seeIfavail = ""
+        #
+        self.onceRecv = True
+        self.knowSender = True
+        self.senderConnNo = ""
+        self.senderConn = ""
+        self.beginRecv = False
+        #
         self.newMsg = True
         self.toSend = ""
         self.msgtype = ""
@@ -38,14 +45,11 @@ class Network:
                 print("Name: ", self.name)
                 self.conn_dict[self.conn] = self.nameInc
                 self.name_dict[self.nameInc]  = self.name
+                print("keys: ", self.conn_dict.keys())
 
                 ######################################################
                 self.updateUser = str(self.name_dict)
                 self.sendingNewClient(self.updateUser, self.conn_dict.keys())
-
-                # self.updateUser = pickle.dumps(self.name_dict)
-                # self.sendingNewClient(self.updateUser, self.conn_dict.keys())
-
 
                 self.nameInc += 1
 
@@ -67,46 +71,68 @@ class Network:
 
     def recv(self):
         while True:
-            self.data = self.conn.recv(SIZE + 7)
-            print("some....:", self.conn_dict[self.conn])
-            print("Name: ", self.name_dict[int(self.conn_dict[self.conn])])
-            if self.newMsg:
-                print("in msg...", self.data)
-                print("length...: ", self.data[1:SIZE])
-                self.msglen = int(self.data.decode("utf-8")[1:SIZE])
-                print("some.1...:", self.conn_dict[self.conn])
-                print("Name1: ", self.name_dict[int(self.conn_dict[self.conn])])
-                self.msgtype = str(self.data.decode("utf-8")[SIZE+1:SIZE+2])
-                print("msgtype>>>> ", self.msgtype)
-                self.newMsg = False
+            if self.knowSender:
+                if self.onceRecv:
+                    self.onceData = self.conn.recv(SIZE+2)
+                    self.onceRecv = False
+                    print("Value of OnceREcv: ", self.onceRecv)
+                print("OnceData: ", self.onceData)
+                print("Value of OnceREcv After if state: ", self.onceRecv)
+                self.senderConnNo = self.onceData.decode("utf-8")[SIZE:]
+                print("SenderNo: ", self.senderConnNo)
+                self.key_list1 = list(self.conn_dict.keys())
+                self.value_list1 = list(self.conn_dict.values())
+                self.senderConn = self.key_list1[self.value_list1.index(int(self.senderConnNo))]
+                print("SenderConn:....", self.senderConn)
+                self.onceData = ""
+                self.knowSender = False
+                self.beginRecv = True
 
-            if self.msgtype == "r":
-                print("in True of  r....")
-                self.incomingMsg += self.data.decode("utf-8")
-                print("incoming...: ", self.incomingMsg)
-                print("len...: ", self.msglen)
-                print("type: ", self.msgtype)
-                print("idk....: ", self.incomingMsg[int(self.incomingMsg.index("r")) + 1:])
-                if len(self.incomingMsg[int(self.incomingMsg.index("r")) + 1:])  == self.msglen:
-                    print("msglen: ", self.msglen)
-                    print(f"Sender: {self.name_dict[self.conn_dict[self.conn]]} ........ {self.incomingMsg[SIZE+2:]}")
-                    #################################
-                    self.key_list = list(self.conn_dict.keys())
-                    self.value_list = list(self.conn_dict.values())
-                    print("whole:..... ", self.incomingMsg)
-                    #################################
-                    self.toSend = self.key_list[self.value_list.index(int(self.incomingMsg[:1]))]
-                    print("Sending To:....", self.toSend)
-                    self.sending(self.toSend, self.incomingMsg[SIZE+2:], self.incomingMsg[:1])
-                    self.incomingMsg = ""
-                    self.data = ""
-                    self.msgtype = ""
-                    self.toSend = ""
-                    self.newMsg = True
+
+
+
+
+            if self.beginRecv:
+                self.data = self.senderConn.recv(SIZE + 7)
+                print("Name: ", self.name_dict[int(self.conn_dict[self.senderConn])])
+                if self.newMsg:
+                    print("length...: ", self.data[1:SIZE])
+                    self.msglen = int(self.data.decode("utf-8")[1:SIZE])
+                    print("Name1: ", self.name_dict[int(self.conn_dict[self.senderConn])])
+                    self.msgtype = str(self.data.decode("utf-8")[SIZE+1:SIZE+2])
+                    self.newMsg = False
+
+                if self.msgtype == "r":
+                    self.incomingMsg += self.data.decode("utf-8")
+                    print("incoming...: ", self.incomingMsg)
+                    print("len...: ", self.msglen)
+                    if len(self.incomingMsg[int(self.incomingMsg.index("r")) + 1:])  == self.msglen:
+                        print(f"Sender: {self.name_dict[self.conn_dict[self.senderConn]]} ........ {self.incomingMsg[SIZE+2:]}")
+                        #################################
+                        self.key_list = list(self.conn_dict.keys())
+                        self.value_list = list(self.conn_dict.values())
+                        #################################
+                        self.toSend = self.key_list[self.value_list.index(int(self.incomingMsg[:1]))]
+                        print("Sending To:....", self.toSend)
+                        self.sending(self.toSend, self.incomingMsg[SIZE+2:], self.senderConnNo)
+                        print("above connNo: ", self.senderConnNo)
+                        self.senderConn = ""
+                        self.incomingMsg = ""
+                        self.data = ""
+                        self.msgtype = ""
+                        self.toSend = ""
+                        self.beginRecv = False
+                        self.onceRecv = True
+                        self.knowSender = True
+
+                        self.newMsg = True
 
     def sending(self, sendingTo, dataToSend, Sender):
-        #print("data being send>>> ", str(f"{len(dataToSend):<{SIZE}}" "r" + {str(Sender)} + dataToSend))
+        print("Sender: ", Sender)
+        print("Datatosend: ", dataToSend)
+        print("Sending this: ", str(f"{len(dataToSend):<{SIZE}}r{str(Sender)}{dataToSend}"))
         sendingTo.send(str(f"{len(dataToSend):<{SIZE}}r{str(Sender)}{dataToSend}").encode("utf-8"))
+
 
 
 
