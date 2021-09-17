@@ -71,22 +71,12 @@ class Network:
         while True:
             self.user_text = input("")
             if self.user_text:
-                if self.sendId:
-                    ############################
-                    self.listValue = list(self.clientsList.values())
-                    self.listKeys = list(self.clientsList.keys())
-                    self.client.send(str(f"{str('r'):<{SIZE}}{self.listKeys[int(self.listValue.index(Name))]}").encode("utf-8"))
-                    self.sendId = False
-                    self.begin_sending = True
-                    #############################
-                if self.begin_sending:
-                    if self.user_text[:1].isnumeric():
-                        msg = str(f"{self.user_text[:1]}{len(self.user_text) - 1:<{SIZE}}" + "r" + self.user_text[1:])
-                        self.client.send(msg.encode("utf-8"))
-                        print("sending id")
-                        self.sendId = True
-                        self.begin_sending = False
-                        msg = ""
+                if self.user_text[:1].isnumeric():
+                    self.clientsList_keys = list(self.clientsList.keys())
+                    self.clientsList_values = list(self.clientsList.values())
+                    msg = str(f"{self.user_text[:1]}{len(self.user_text) - 1:<{SIZE}}" + "r" + str(self.clientsList_keys[int(self.clientsList_values.index(Name))]) + self.user_text[1:])
+                    self.client.send(msg.encode("utf-8"))
+                    msg = ""
 
 
     def strThread(self):
