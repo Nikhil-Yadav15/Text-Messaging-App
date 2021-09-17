@@ -24,7 +24,7 @@ class Network:
 
     def join(self):
         try:
-            self.client.connect(('192.168.1.5', 9229))
+            self.client.connect(('0.0.0.0', 8989))
             print("Connected")
             print(self.client.recv(100).decode("utf-8"))
             self.client.sendall(Name.encode("utf-8"))
@@ -78,7 +78,12 @@ class Network:
                     self.client.send(msg.encode("utf-8"))
                     msg = ""
 
-
+                elif self.user_text[:1] == "g":
+                    self.clientsList_keys = list(self.clientsList.keys())
+                    self.clientsList_values = list(self.clientsList.values())
+                    msg1 = str(f"{str('~')}{len(self.user_text) - 1:<{SIZE}}" + "g" + str(self.clientsList_keys[int(self.clientsList_values.index(Name))]) + self.user_text[1:])
+                    self.client.send(msg1.encode("utf-8"))
+                    msg1 = ""
     def strThread(self):
         threading.Thread(target = self.recv).start()
         threading.Thread(target=self.send).start()
