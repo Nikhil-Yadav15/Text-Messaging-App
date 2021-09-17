@@ -7,7 +7,6 @@ SIZE = 10
 # n: new client msg send
 # s: single interaction
 # g: grp interaction
-# i: identity
 
 class Network:
     def __init__(self):
@@ -28,7 +27,7 @@ class Network:
         self.incomingMsg = ""
         self.nameInc = 0
         try:
-            self.sock.bind(('192.168.1.5', 9229))
+            self.sock.bind(('0.0.0.0', 8989))
             print("Ready...")
             self.sock.listen(5)
             self.acceptance()
@@ -56,7 +55,10 @@ class Network:
             if self.addr not in self.addr_list:
                 self.addr_list.append(self.addr)
                 print("Connected to: ", self.conn_dict.items())
+
+            # self.sending(self.conn_dict.keys())
             threading.Thread(target=self.recv).start()
+            # self.recv()
 
     def sendingNewClient(self, user, clients):
         print("self.updateUser: ", user)
@@ -65,6 +67,7 @@ class Network:
             print("user len: ", len(user))
             print(str(f"{len(user):<{SIZE}}" + "n" + user))
             i.send(str(f"{len(user):<{SIZE}}" + "n"+user).encode("utf-8"))
+        # self.knowSender = True
 
     def recv(self):
         while True:
@@ -94,7 +97,7 @@ class Network:
                     self.incomingMsg += self.data.decode("utf-8")
                     print("incoming...: ", self.incomingMsg)
                     print("len...: ", self.msglen)
-                    print("Index length: ", self.incomingMsg[int(self.incomingMsg.index("r")) + 1:])
+                    print("Index length: ", self.incomingMsg[int(self.incomingMsg.index("r")) + 2:])
                     self.conn = self.senderConn
                     if len(self.incomingMsg[int(self.incomingMsg.index("r")) + 2:])  == self.msglen:
                         print(f"Sender: {self.name_dict[self.conn_dict[self.senderConn]]} ........ {self.incomingMsg[SIZE+3:]}")
@@ -117,6 +120,24 @@ class Network:
                         print("near end....")
                         self.newMsg = True
 
+                elif self.msgtype == "g":
+                    self.incomingMsg += self.data.decode("utf-8")
+                    print("incoming...: ", self.incomingMsg)
+                    print("len...: ", self.msglen)
+                    print("Index length: ", self.incomingMsg[int(self.incomingMsg.index("g")) + 1:])
+                    self.conn = self.senderConn
+                    if len(self.incomingMsg[int(self.incomingMsg.index("g")) + 2:]) == self.msglen:
+                        print(f"Sender: {self.name_dict[self.conn_dict[self.senderConn]]} ........ {self.incomingMsg[SIZE + 3:]}")
+                        self.groupSending(self.incomingMsg[SIZE+3:], self.senderConnNo)
+
+                        self.senderConn = ""
+                        self.senderConnNo = ""
+                        self.incomingMsg = ""
+                        self.data = ""
+                        self.msgtype = ""
+                        self.knowSender = True
+                        print("near end grp....")
+                        self.newMsg = True
                 ##################################
 
     def sending(self, sendingTo, dataToSend, Sender):
@@ -125,7 +146,12 @@ class Network:
         print("Sending this: ", str(f"{len(dataToSend):<{SIZE}}r{str(Sender)}{dataToSend}"))
         sendingTo.send(str(f"{len(dataToSend):<{SIZE}}r{str(Sender)}{dataToSend}").encode("utf-8"))
 
-
+    def groupSending(self, DataToSend, sender):
+        print("Sender Grp: ", sender)
+        print("Datatosend Grp: ", DataToSend)
+        for i in self.conn_dict.keys():
+            if self.conn_dict[i] != sender:
+                i.send(str(f"{len(DataToSend):<{SIZE}}r{str(sender)}{DataToSend}").encode("utf-8"))
 
 
 
