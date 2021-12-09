@@ -93,7 +93,7 @@ Kv = '''
                             MDFloatLayout:
                                 Image:
                                     size_hint: 1, 1
-                                    source: "logo.png"
+                                    source: "Logo1.png"
                                     pos_hint:{"center_x": 0.6, "y": 0.1}
                             
                             
