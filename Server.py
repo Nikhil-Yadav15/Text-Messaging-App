@@ -1,12 +1,12 @@
 import socket
 import threading
-import pickle
 SIZE = 10
 
 # r: simple send message
 # n: new client msg send
 # s: single interaction
 # g: grp interaction
+# i: identity
 
 class Network:
     def __init__(self):
@@ -27,7 +27,7 @@ class Network:
         self.incomingMsg = ""
         self.nameInc = 0
         try:
-            self.sock.bind(('0.0.0.0', 8989))
+            self.sock.bind(('', 2))
             print("Ready...")
             self.sock.listen(5)
             self.acceptance()
@@ -41,10 +41,8 @@ class Network:
 
             if self.conn not in self.conn_dict.keys():
                 self.name = self.conn.recv(100).decode("utf-8")
-                print("Name: ", self.name)
                 self.conn_dict[self.conn] = self.nameInc
                 self.name_dict[self.nameInc]  = self.name
-                print("keys: ", self.conn_dict.keys())
 
                 ######################################################
                 self.updateUser = str(self.name_dict)
@@ -71,10 +69,12 @@ class Network:
 
     def recv(self):
         while True:
-            print("begin recv is true.....")
             self.data = self.conn.recv(SIZE + 7)
-            print("data: ", self.data)
+            if not self.data:
+                pass
             if self.data:
+                print("begin recv is true.....")
+                print("data: ", self.data)
                 if self.knowSender:
                     self.senderConnNo = int(self.data.decode("utf-8")[SIZE+2:SIZE+3])
                     print("SenderNO: ", self.senderConnNo)
@@ -84,7 +84,7 @@ class Network:
                     #######################################
                     self.senderConn = self.key_list1[int(self.value_list1.index(self.senderConnNo))]
                     self.knowSender = False
-                    print("sender conn above>....: ", self.senderConn)
+                    print("sender conn above>....: " , self.senderConn)
                 print("Name: ", self.name_dict[int(self.conn_dict[self.senderConn])])
                 if self.newMsg:
                     print("length...: ", self.data[1:SIZE])
@@ -138,6 +138,24 @@ class Network:
                         self.knowSender = True
                         print("near end grp....")
                         self.newMsg = True
+
+                elif self.msgtype == "l":
+                    print("reached...........")
+                    self.incomingMsg += self.data.decode("utf-8")
+                    self.conn = self.senderConn
+                    print("Came: ", self.incomingMsg[SIZE + 3:])
+                    self.send_Left(str(self.senderConnNo))
+                    self.name_dict.pop(self.senderConnNo)
+                    self.conn_dict.pop(self.senderConn)
+                    self.senderConn = ""
+                    self.senderConnNo = ""
+                    self.incomingMsg = ""
+                    self.data = ""
+                    self.msgtype = ""
+                    self.knowSender = True
+                    print("near end leave....")
+                    self.newMsg = True
+
                 ##################################
 
     def sending(self, sendingTo, dataToSend, Sender):
@@ -146,12 +164,17 @@ class Network:
         print("Sending this: ", str(f"{len(dataToSend):<{SIZE}}r{str(Sender)}{dataToSend}"))
         sendingTo.send(str(f"{len(dataToSend):<{SIZE}}r{str(Sender)}{dataToSend}").encode("utf-8"))
 
+    def send_Left(self, leaving):
+        for i in self.conn_dict.keys():
+            if self.conn_dict[i] != int(leaving):
+                i.send(str(f"{leaving:<{SIZE}}l").encode("utf-8"))
+
     def groupSending(self, DataToSend, sender):
         print("Sender Grp: ", sender)
         print("Datatosend Grp: ", DataToSend)
         for i in self.conn_dict.keys():
             if self.conn_dict[i] != sender:
-                i.send(str(f"{len(DataToSend):<{SIZE}}r{str(sender)}{DataToSend}").encode("utf-8"))
+                i.send(str(f"{len(DataToSend):<{SIZE}}g{str(sender)}{DataToSend}").encode("utf-8"))
 
 
 
