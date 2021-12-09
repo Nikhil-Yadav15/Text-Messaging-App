@@ -68,7 +68,7 @@ Kv = '''
                 size_hint: 0.7, 1
                 MDBoxLayout:
                     orientation: "vertical"
-                    size_hint: 1, 0.08 
+                    size_hint: 1, 0.079 
                     MDToolbar:
                         id: tool
                         specific_text_color: root.colorMith("text")
@@ -165,18 +165,18 @@ Kv = '''
                     size_hint_y: 0.078
                 MDSeparator:
                     id: sep2
-                    color: root.colorMith("sep") #mn.colorApp["sep"]
+                    color: root.colorMith("sep")
                 MDLabel:
                     id: unReadLabel
                     text: "Unread Chats:   0"
-                    color: root.colorMith("text") #mn.colorApp["text"]
-                    md_bg_color: root.colorMith("dark") #mn.colorApp["dark"]
+                    color: root.colorMith("text")
+                    md_bg_color: root.colorMith("dark")
                     font_size: "25sp"
                     halign: "center"
                     size_hint: 1, 0.09
                 MDSeparator:
                     id: sep3
-                    color: root.colorMith("sep") #mn.colorApp["sep"]
+                    color: root.colorMith("sep")
                 ScrollView:
                     size_hint: 1, 0.8
                     do_scroll_y: True
@@ -307,7 +307,11 @@ class MainWind(ScreenManager):
             self.KnowIdOnce = False
         for i in Incdict.keys():
             if i != self.MYID and i not in self.olderlist:
-                self.btn = MDRectangleFlatIconButton(icon = "account-circle", text=Incdict[i], icon_color = self.color["text"], theme_text_color = "Custom", text_color =self.color["text"], line_color = self.color["text"], font_size = "40sp",size_hint_y = None, height=50)
+                try:
+                    txt = Incdict[i][:11]
+                except:
+                    txt = Incdict[i]
+                self.btn = MDRectangleFlatIconButton(icon = "account-circle", text=txt, icon_color = self.color["text"], theme_text_color = "Custom", text_color =self.color["text"], line_color = self.color["text"], font_size = "35sp",size_hint_y = None, height=50)
                 self.btn.size_hint_x = 1
                 self.ids["btn" + str(i)] = self.btn
                 self.btnDict[self.ids["btn" + str(i)]] = "btn" + str(i)
@@ -317,7 +321,7 @@ class MainWind(ScreenManager):
 
         self.olderlist = list(Incdict.keys())
         if len(self.clientsList.keys()) >= 3 and self.once == True:
-            self.everyone_But = MDRectangleFlatIconButton(text= "Everyone", font_size="45sp",icon = "account-circle", icon_color = self.color["text"], theme_text_color = "Custom", text_color =self.color["text"],line_color = self.color["text"], height=50)
+            self.everyone_But = MDRectangleFlatIconButton(text= "Everyone", font_size="42sp",icon = "account-circle", icon_color = self.color["text"], theme_text_color = "Custom", text_color =self.color["text"],line_color = self.color["text"], height=50)
             self.everyone_But.size_hint = (1, None)
             self.everyone_But.bind(on_press = lambda dt: self.identify_btn(2))
             self.ids.ord.add_widget(self.everyone_But)
@@ -393,8 +397,7 @@ class MainWind(ScreenManager):
         self.inpBox.size_hint = (1, 0.1)
         self.inpBox.spacing = 50
         ###############
-        self.inpBox.inp = MDTextFieldRound(hint_text = "Message", foreground_color = self.color["text"], color_active = self.color["light"], normal_color = self.color["normal"])
-        self.inpBox.inp.size_hint = (0.5, 0.4)
+        self.inpBox.inp = MDTextFieldRound(hint_text = "Message", size_hint = (0.5, 0.4), foreground_color = self.color["text"], color_active = self.color["light"], normal_color = self.color["normal"])
         self.inpBox.inp.hint_text_color = self.color["text"]
         self.inpBox.inp.multiline = True
         ################
@@ -483,7 +486,7 @@ class MainWind(ScreenManager):
         for i in message:
             if i== "\n":
                 self.lineBreakSender += 1
-        self.takeObj = MDBoxLayout(orientation = "horizontal", md_bg_color = (0.4, 0.1, 0.1, 1), size_hint = (1, None))
+        self.takeObj = MDBoxLayout(orientation = "horizontal", md_bg_color = (0,15/250,90/250, 0.5), size_hint = (1, None))
         self.cardSender = MDCard(radius=[20, 0, 20, 20], spacing = 3, padding=[8, 0, 8, 8], size_hint=(None, None), pos_hint = {"right": 1}
                              , md_bg_color = self.color["sender"])
 
@@ -530,7 +533,7 @@ class MainWind(ScreenManager):
 
         else:
             self.takeObj.height = self.cardSender.height
-            self.takeObj.add_widget(MDLabel(text=f'Sender: {self.clientsList[int(sender)]}', font_size="90sp", halign="center", valign="center"))
+            self.takeObj.add_widget(MDLabel(text=f'Sender: {self.clientsList[int(sender)]}', font_style = "H6", halign="center", valign="center"))
             self.takeObj.add_widget(self.cardSender)
             self.ids.everMSGBOX.add_widget(self.takeObj)
             self.ids.everMSGBOX.add_widget(MDLabel(text=f'{datetime.datetime.now().strftime("%I:%M%p")}', halign = "right",theme_text_color =  "Custom", text_color = self.color["text"]))
