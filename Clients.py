@@ -234,7 +234,7 @@ class MainWind(ScreenManager):
             pass
     def askName(self):
         self.pop = Popup()
-        self.pop.title = "Enter Your Name"
+        self.pop.title = "Enter the Details"
         self.pop.size_hint = (0.5, 0.6)
         self.pop.auto_dismiss = False
         self.pop.title_size = 20
