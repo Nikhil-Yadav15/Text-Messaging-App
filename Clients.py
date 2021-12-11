@@ -526,7 +526,7 @@ class MainWind(ScreenManager):
                     if self.ids.insManage.current != "scr" + str(sender):
                         self.unRead.append(int(sender))
                         for i in self.btnDict.keys():
-                            if self.btnDict[i] != "scr" + str(sender):
+                            if self.btnDict[i] == "btn" + str(sender):
                                 i.icon = "message-text"
                                 i.icon_color = (0, 1, 0, 1)
                                 break
