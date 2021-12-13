@@ -468,18 +468,19 @@ class MainWind(ScreenManager):
         self.cardUser.add_widget(self.lbIncardUser)
         ######################################################
         self.cardUser.height += dp(self.lineBreak*self.lbIncardUser.font_size)
-        if str(self.toDisplay) != "g":
-            self.msgBoxDict["msgBox" + str(self.toDisplay)].add_widget(self.cardUser)
-            self.msgBoxDict["msgBox" + str(self.toDisplay)].add_widget(MDLabel(text = f'{datetime.datetime.now().strftime("%I:%M%p")}', theme_text_color =  "Custom", text_color = self.color["text"]))
-            self.msgBoxDict["msgBox" + str(self.toDisplay)].height += dp(self.cardUser.height + 20)
-            self.user_text = str(self.toDisplay) + str(self.indMessage)
-            self.inputDict["inpBox" + self.toDisplay].text = ""
-        else:
-            self.ids.everMSGBOX.add_widget(self.cardUser)
-            self.ids.everMSGBOX.add_widget(MDLabel(text = f'{datetime.datetime.now().strftime("%I:%M%p")}', theme_text_color =  "Custom", text_color = self.color["text"]))
-            self.ids.everMSGBOX.height += dp(self.cardUser.height + 20)
-            self.user_text = str(self.toDisplay) + str(self.ids.everTextField.text)
-            self.ids.everTextField.text = ""
+        if self.indMessage:
+            if str(self.toDisplay) != "g":
+                self.msgBoxDict["msgBox" + str(self.toDisplay)].add_widget(self.cardUser)
+                self.msgBoxDict["msgBox" + str(self.toDisplay)].add_widget(MDLabel(text = f'{datetime.datetime.now().strftime("%I:%M%p")}', theme_text_color =  "Custom", text_color = self.color["text"]))
+                self.msgBoxDict["msgBox" + str(self.toDisplay)].height += dp(self.cardUser.height + 20)
+                self.user_text = str(self.toDisplay) + str(self.indMessage)
+                self.inputDict["inpBox" + self.toDisplay].text = ""
+            else:
+                self.ids.everMSGBOX.add_widget(self.cardUser)
+                self.ids.everMSGBOX.add_widget(MDLabel(text = f'{datetime.datetime.now().strftime("%I:%M%p")}', theme_text_color =  "Custom", text_color = self.color["text"]))
+                self.ids.everMSGBOX.height += dp(self.cardUser.height + 20)
+                self.user_text = str(self.toDisplay) + str(self.ids.everTextField.text)
+                self.ids.everTextField.text = ""
 
     def addTextSender(self, sender, message, typ):
         self.lineBreakSender = 0
